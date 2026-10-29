@@ -1,3 +1,21 @@
+## <small>1.0.1 (2026-10-29)</small>
+
+* fix: bundle the TypeScript parser so twd-lint works in TypeScript 7 projects ([6b83ddd](https://github.com/BRIKEV/twd-lint/commit/6b83ddd))
+* docs: use hello@twd.dev as the contact email ([d10855a](https://github.com/BRIKEV/twd-lint/commit/d10855a))
+
+**Why twd-lint crashed in TypeScript 7 projects.** twd-lint parses test files
+with typescript-eslint, which loads the project's own `typescript` package and
+refuses TypeScript 7: that release ships without the JS API typescript-eslint
+needs. In a TypeScript 7 project, both `npx twd-lint` and the ESLint plugin
+stopped on startup with "typescript-eslint does not support TS 7.0". The rules
+only read the syntax tree, so the TypeScript version that parses the files does
+not have to match the project's: twd-lint now ships the parser and TypeScript 6
+inside the package, and works the same whatever TypeScript version the project
+uses, or none. The package is larger for it, about 1.8 MB to download, and its
+bundled licenses are in `dist/THIRD-PARTY-LICENSES.txt`. This is temporary:
+once typescript-eslint supports TypeScript 7, twd-lint goes back to depending on
+it normally.
+
 ## 1.0.0 (2026-10-12)
 
 * feat!: remove `twd/single-top-level-describe` ([e70ab56](https://github.com/BRIKEV/twd-lint/commit/e70ab56), [4968a16](https://github.com/BRIKEV/twd-lint/commit/4968a16))

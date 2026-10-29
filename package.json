@@ -1,6 +1,6 @@
 {
   "name": "twd-lint",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lint TWD tests: catch mistakes in the editor and in CI. An ESLint plugin and a zero-config CLI.",
   "keywords": [
     "eslint",

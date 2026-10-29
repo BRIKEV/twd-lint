@@ -46,3 +46,28 @@ jobs:
             echo "FAIL: the lint playground should exit 1 (problems found), got $code"
             exit 1
           fi
+
+      # The packed tarball installed in a TypeScript 7 project, the way users
+      # get it. typescript-eslint refuses TS 7, so this only passes while the
+      # parser and our own TypeScript stay bundled in dist.
+      - name: Packed package in a TypeScript 7 project
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          app="$RUNNER_TEMP/ts7-app"
+          mkdir -p "$app/src"
+          cp example/lint-playground/*.twd.test.ts "$app/src/"
+          cd "$app"
+          echo '{ "name": "ts7-app", "private": true, "type": "module" }' > package.json
+          echo "import twd from 'twd-lint'; export default [twd.configs.recommended]" > eslint.config.js
+          npm install --no-audit --no-fund -D typescript@7 eslint "$RUNNER_TEMP"/twd-lint-*.tgz
+          echo "typescript $(node -p "require('typescript/package.json').version")"
+          # A crash exits 1 too, so also require the rules' reports in the output
+          for cmd in "npx twd-lint src" "npx eslint src"; do
+            code=0
+            out="$($cmd 2>&1)" || code=$?
+            echo "$out"
+            if [ "$code" -ne 1 ] || ! echo "$out" | grep -qE '[0-9]+:[0-9]+ +error .* twd/[a-z-]+$'; then
+              echo "FAIL: '$cmd' should report the playground's mistakes and exit 1, got $code"
+              exit 1
+            fi
+          done

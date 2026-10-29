@@ -1,0 +1,33 @@
+name: TypeScript 7 watch
+
+# twd-lint bundles typescript-eslint and TypeScript 6 into dist (see
+# tsup.config.ts) only because typescript-eslint refuses TypeScript 7:
+# https://github.com/typescript-eslint/typescript-eslint/issues/10940
+#
+# This job fails, and GitHub emails the repo owner, once the latest
+# typescript-eslint accepts TypeScript 7. That is the signal to remove the
+# bundling. It passes every week until then.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Mondays, 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Does typescript-eslint support TypeScript 7 yet?
+        run: |
+          range="$(npm view @typescript-eslint/parser@latest peerDependencies.typescript)"
+          echo "@typescript-eslint/parser@latest accepts typescript $range"
+          # Support may start at 7.1 (7.0 has no JS API), so try several 7.x
+          if npx --yes semver@7 --range "$range" 7.0.0 7.1.0 7.2.0 7.5.0 > /dev/null; then
+            echo "::error::typescript-eslint now supports TypeScript 7. Remove the bundling:"
+            echo "1. tsup.config.ts: drop noExternal, banner, metafile, onSuccess and writeThirdPartyLicenses"
+            echo "2. package.json: move @typescript-eslint/parser and @typescript-eslint/utils back to dependencies"
+            echo "3. ci.yml: keep the TypeScript 7 step, it now tests typescript-eslint itself"
+            echo "4. README.md: drop the 'parses with its own TypeScript 6' bullet"
+            echo "5. delete this workflow"
+            exit 1
+          fi

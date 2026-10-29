@@ -63,6 +63,9 @@ That is all. `recommended`:
   or your Vitest/Jest tests;
 - brings its own TypeScript parser for those files, so it works in JavaScript
   projects and in projects without TypeScript set up in ESLint;
+- parses with its own TypeScript 6, whatever version your project uses: it
+  works in TypeScript 7 projects too, which typescript-eslint does not support
+  yet;
 - turns on every rule below as an error.
 
 To pick rules yourself instead:
